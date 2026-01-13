@@ -47,4 +47,10 @@ export class AiController {
         );
         return { feedback };
     }
+
+    @Post('translate')
+    async translate(@Body() body: { text: string; context?: string }) {
+        const translation = await this.aiService.translate(body.text, body.context);
+        return { translation };
+    }
 }

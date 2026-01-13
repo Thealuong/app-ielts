@@ -87,6 +87,8 @@ export const aiAPI = {
         api.post('/ai/explain', { word, context }),
     explainError: (question: string, userAnswer: string, correctAnswer: string, context?: string) =>
         api.post('/ai/explain-error', { question, userAnswer, correctAnswer, context }),
+    translate: (text: string, context?: string) =>
+        api.post('/ai/translate', { text, context }),
 };
 
 // Notes APIs

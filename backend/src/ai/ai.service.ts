@@ -287,6 +287,29 @@ export class AiService {
         }
     }
 
+    async translate(text: string, context: string = ''): Promise<string> {
+        if (!this.model) return 'AI Translate Unavailable';
+
+        const prompt = `Translate the following text to VIETNAMESE.
+        Text: "${text}"
+        ${context ? `Context/Topic: ${context}` : ''}
+        
+        Requirements:
+        - Return ONLY the Vietnamese translation.
+        - Keep the tone natural and appropriate for learning.
+        - If it's a single word, provide the meaning.
+        - If it's a sentence, translate the full sentence.`;
+
+        try {
+            const result = await this.model.generateContent(prompt);
+            const response = await result.response;
+            return response.text();
+        } catch (error) {
+            console.error('AI error translate:', error);
+            return 'Lỗi dịch thuật.';
+        }
+    }
+
     private async getCachedContent(word: string, contentType: string): Promise<AiGeneratedContent | null> {
         // Find cached content that hasn't expired
         const cached = await this.cacheRepository.findOne({

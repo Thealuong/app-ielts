@@ -11,8 +11,9 @@ import {
 } from 'react-native';
 import { vocabularyAPI, progressAPI, aiAPI, notesAPI } from '../services/api';
 import QuickNote from '../components/QuickNote';
+import TranslatableText from '../components/TranslatableText';
 
-export default function LearnScreen({ route }: any) {
+export default function LearnScreen({ route, navigation }: any) {
     const { dayNumber, topicName } = route?.params || {};
     const [words, setWords] = useState<any[]>([]);
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -192,18 +193,25 @@ export default function LearnScreen({ route }: any) {
         <View style={styles.container}>
             {/* Header */}
             <View style={styles.header}>
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <TouchableOpacity onPress={handlePrevious} style={{ padding: 8, marginRight: 4 }}>
-                        <Text style={{ fontSize: 28, color: currentIndex > 0 ? '#4F46E5' : '#E5E7EB' }}>⬅</Text>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 5 }}>
+                    <TouchableOpacity onPress={() => navigation.goBack()} style={{ padding: 4 }}>
+                        <Text style={{ fontSize: 24 }}>🔙</Text>
                     </TouchableOpacity>
-
-                    <TouchableOpacity onPress={handleNextWord} style={{ padding: 8 }}>
-                        <Text style={{ fontSize: 28, color: currentIndex < words.length - 1 ? '#4F46E5' : '#E5E7EB' }}>➡</Text>
-                    </TouchableOpacity>
+                    <Text style={styles.headerTitle}>{topicName ? topicName : 'Learn Words'}</Text>
+                    <View style={{ width: 30 }} />
                 </View>
 
-                <View style={{ alignItems: 'flex-end' }}>
-                    <Text style={styles.headerTitle}>Word</Text>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                        <TouchableOpacity onPress={handlePrevious} style={{ padding: 8, marginRight: 4 }}>
+                            <Text style={{ fontSize: 28, color: currentIndex > 0 ? '#4F46E5' : '#E5E7EB' }}>⬅</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity onPress={handleNextWord} style={{ padding: 8 }}>
+                            <Text style={{ fontSize: 28, color: currentIndex < words.length - 1 ? '#4F46E5' : '#E5E7EB' }}>➡</Text>
+                        </TouchableOpacity>
+                    </View>
+
                     <Text style={styles.progress}>
                         {currentIndex + 1} / {words.length}
                     </Text>
@@ -237,13 +245,26 @@ export default function LearnScreen({ route }: any) {
                     {showDefinition && (
                         <>
                             <View style={styles.divider} />
-                            <Text style={styles.definition}>{currentWord.definition}</Text>
+
+                            {/* Definition */}
+                            <TranslatableText
+                                text={currentWord.definition}
+                                style={styles.definition}
+                                type="definition"
+                                context={currentWord.word}
+                            />
 
                             {currentWord.exampleSentences && currentWord.exampleSentences.length > 0 && (
                                 <View style={styles.examples}>
                                     <Text style={styles.sectionTitle}>Examples:</Text>
                                     {currentWord.exampleSentences.map((ex: string, i: number) => (
-                                        <Text key={i} style={styles.example}>• {ex}</Text>
+                                        <View key={i} style={{ marginBottom: 12 }}>
+                                            <TranslatableText
+                                                text={`• ${ex}`}
+                                                style={styles.example}
+                                                type="example"
+                                            />
+                                        </View>
                                     ))}
                                 </View>
                             )}
@@ -271,7 +292,11 @@ export default function LearnScreen({ route }: any) {
                                         <View key={i} style={styles.learningCard}>
                                             <Text style={styles.patternText}>🔹 {item.pattern}</Text>
                                             {item.meaning && <Text style={styles.meaningText}>({item.meaning})</Text>}
-                                            <Text style={styles.exampleText}>📌 {item.example}</Text>
+                                            <TranslatableText
+                                                text={`📌 ${item.example}`}
+                                                style={styles.exampleText}
+                                                type="example"
+                                            />
                                         </View>
                                     ))}
                                 </View>

@@ -29,7 +29,7 @@ export class VocabularyController {
 
     @Get('topics')
     async getTopics() {
-        return this.vocabularyService.getTopics();
+        return this.vocabularyService.getTopics(1); // Hardcoded for single user
     }
 
     @Get('by-topic')

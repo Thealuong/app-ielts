@@ -43,21 +43,34 @@ export default function RoadmapScreen({ navigation }: any) {
         );
     }
 
-    const renderItem = ({ item, index }: { item: any; index: number }) => (
-        <TouchableOpacity
-            style={styles.topicCard}
-            onPress={() => handleTopicPress(item.topic)}
-        >
-            <View style={styles.circle}>
-                <Text style={styles.stepNumber}>{index + 1}</Text>
-            </View>
-            <View style={styles.content}>
-                <Text style={styles.topicTitle}>{item.topic}</Text>
-                <Text style={styles.wordCount}>{item.count} words</Text>
-            </View>
-            <Text style={styles.arrow}>➡️</Text>
-        </TouchableOpacity>
-    );
+    const renderItem = ({ item, index }: { item: any; index: number }) => {
+        const learned = parseInt(item.learned) || 0;
+        const total = parseInt(item.count) || 0;
+        const percentage = total > 0 ? (learned / total) * 100 : 0;
+
+        return (
+            <TouchableOpacity
+                style={styles.topicCard}
+                onPress={() => handleTopicPress(item.topic)}
+            >
+                <View style={[styles.circle, percentage === 100 && { backgroundColor: '#D1FAE5' }]}>
+                    <Text style={[styles.stepNumber, percentage === 100 && { color: '#059669' }]}>
+                        {percentage === 100 ? '✓' : index + 1}
+                    </Text>
+                </View>
+                <View style={styles.content}>
+                    <Text style={styles.topicTitle}>{item.topic}</Text>
+                    <View style={styles.progressRow}>
+                        <Text style={styles.wordCount}>{learned} / {total} words</Text>
+                        <Text style={styles.percentage}>{Math.round(percentage)}%</Text>
+                    </View>
+                    <View style={styles.track}>
+                        <View style={[styles.bar, { width: `${percentage}%` }]} />
+                    </View>
+                </View>
+            </TouchableOpacity>
+        );
+    };
 
     return (
         <View style={styles.container}>
@@ -145,5 +158,26 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         color: '#6B7280',
         marginTop: 40,
+    },
+    progressRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 6,
+    },
+    percentage: {
+        fontSize: 12,
+        fontWeight: 'bold',
+        color: '#4F46E5',
+    },
+    track: {
+        height: 6,
+        backgroundColor: '#F3F4F6',
+        borderRadius: 3,
+        overflow: 'hidden',
+    },
+    bar: {
+        height: '100%',
+        backgroundColor: '#4F46E5',
+        borderRadius: 3,
     },
 });
