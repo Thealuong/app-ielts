@@ -1,0 +1,49 @@
+import { Controller, Get, Post, Body, UseGuards, Request } from '@nestjs/common';
+import { ProgressService } from './progress.service';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+
+@Controller('progress')
+// @UseGuards(JwtAuthGuard) // Disabled for single user
+export class ProgressController {
+    constructor(private progressService: ProgressService) { }
+
+    @Get('dashboard')
+    async getDashboard() {
+        return this.progressService.getDashboard(1); // Hardcoded for single user
+    }
+
+    @Get('calendar')
+    async getCalendar() {
+        return this.progressService.getCalendarStatus(1); // Hardcoded for single user
+    }
+
+    @Post('record')
+    async recordProgress(
+        @Body() body: { vocabularyId: number; quality: number },
+    ) {
+        return this.progressService.recordProgress(
+            1, // Hardcoded for single user
+            body.vocabularyId,
+            body.quality,
+        );
+    }
+
+    @Post('session')
+    async recordSession(
+        @Body()
+        body: {
+            newWordsCount: number;
+            reviewedWordsCount: number;
+            accuracyRate: number;
+            durationMinutes: number;
+        },
+    ) {
+        return this.progressService.recordSession(
+            1, // Hardcoded for single user
+            body.newWordsCount,
+            body.reviewedWordsCount,
+            body.accuracyRate,
+            body.durationMinutes,
+        );
+    }
+}

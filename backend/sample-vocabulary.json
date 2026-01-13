@@ -1,0 +1,222 @@
+[
+    {
+        "word": "abandon",
+        "partOfSpeech": "verb",
+        "definition": "to leave someone or something, especially someone or something that it is your responsibility to stay with",
+        "ipaUk": "/əˈbæn.dən/",
+        "ipaUs": "/əˈbæn.dən/",
+        "examples": [
+            "He abandoned his wife and children.",
+            "The project was abandoned due to lack of funding.",
+            "Never abandon hope."
+        ],
+        "collocations": [
+            "abandon hope",
+            "abandon ship",
+            "abandon plans"
+        ],
+        "synonyms": "desert, forsake, leave",
+        "antonyms": "keep, maintain, continue",
+        "topic": "General",
+        "cefrLevel": "B2",
+        "ieltsBand": "6.0"
+    },
+    {
+        "word": "achieve",
+        "partOfSpeech": "verb",
+        "definition": "to succeed in finishing something or reaching an aim, especially after a lot of work or effort",
+        "ipaUk": "/əˈtʃiːv/",
+        "ipaUs": "/əˈtʃiːv/",
+        "examples": [
+            "She achieved her goal of becoming a doctor.",
+            "The company achieved record profits this year.",
+            "Hard work and dedication helped him achieve success."
+        ],
+        "collocations": [
+            "achieve success",
+            "achieve goals",
+            "achieve results"
+        ],
+        "synonyms": "accomplish, attain, reach",
+        "antonyms": "fail, lose, miss",
+        "topic": "Success",
+        "cefrLevel": "B1",
+        "ieltsBand": "5.5"
+    },
+    {
+        "word": "adequate",
+        "partOfSpeech": "adjective",
+        "definition": "enough or satisfactory for a particular purpose",
+        "ipaUk": "/ˈæd.ɪ.kwət/",
+        "ipaUs": "/ˈæd.ə.kwət/",
+        "examples": [
+            "The salary is adequate for my needs.",
+            "We need adequate time to prepare for the exam.",
+            "The report provides adequate information about the problem."
+        ],
+        "collocations": [
+            "adequate resources",
+            "adequate protection",
+            "adequate explanation"
+        ],
+        "synonyms": "sufficient, enough, acceptable",
+        "antonyms": "inadequate, insufficient",
+        "topic": "Describing quantities",
+        "cefrLevel": "B2",
+        "ieltsBand": "6.0"
+    },
+    {
+        "word": "analyze",
+        "partOfSpeech": "verb",
+        "definition": "to study or examine something in detail, in order to discover more about it",
+        "ipaUk": "/ˈæn.əl.aɪz/",
+        "ipaUs": "/ˈæn.əl.aɪz/",
+        "examples": [
+            "Scientists are analyzing the data from the experiment.",
+            "The report analyzes the causes of climate change.",
+            "We need to analyze the situation carefully before making a decision."
+        ],
+        "collocations": [
+            "analyze data",
+            "analyze results",
+            "analyze trends"
+        ],
+        "synonyms": "examine, study, investigate",
+        "antonyms": "ignore, overlook",
+        "topic": "Academic",
+        "cefrLevel": "B2",
+        "ieltsBand": "6.0"
+    },
+    {
+        "word": "benefit",
+        "partOfSpeech": "noun",
+        "definition": "a helpful or good effect, or something intended to help",
+        "ipaUk": "/ˈben.ɪ.fɪt/",
+        "ipaUs": "/ˈben.ə.fɪt/",
+        "examples": [
+            "The benefits of regular exercise are well known.",
+            "One of the main benefits of online learning is flexibility.",
+            "The new policy will bring benefits to all employees."
+        ],
+        "collocations": [
+            "health benefits",
+            "economic benefits",
+            "mutual benefit"
+        ],
+        "synonyms": "advantage, profit, gain",
+        "antonyms": "disadvantage, harm, drawback",
+        "topic": "Advantages",
+        "cefrLevel": "B1",
+        "ieltsBand": "5.5"
+    },
+    {
+        "word": "comprehensive",
+        "partOfSpeech": "adjective",
+        "definition": "complete and including everything that is necessary",
+        "ipaUk": "/ˌkɒm.prɪˈhen.sɪv/",
+        "ipaUs": "/ˌkɑːm.prɪˈhen.sɪv/",
+        "examples": [
+            "The report provides a comprehensive overview of the issue.",
+            "Students receive comprehensive training in all aspects of the job.",
+            "We need a comprehensive approach to solving this problem."
+        ],
+        "collocations": [
+            "comprehensive study",
+            "comprehensive coverage",
+            "comprehensive guide"
+        ],
+        "synonyms": "complete, thorough, extensive",
+        "antonyms": "partial, incomplete, limited",
+        "topic": "Completeness",
+        "cefrLevel": "C1",
+        "ieltsBand": "7.0"
+    },
+    {
+        "word": "demonstrate",
+        "partOfSpeech": "verb",
+        "definition": "to show or make something clear",
+        "ipaUk": "/ˈdem.ən.streɪt/",
+        "ipaUs": "/ˈdem.ən.streɪt/",
+        "examples": [
+            "The study demonstrates the effectiveness of the new treatment.",
+            "She demonstrated her ability to work under pressure.",
+            "The experiment demonstrates how plants use sunlight."
+        ],
+        "collocations": [
+            "demonstrate ability",
+            "demonstrate skills",
+            "clearly demonstrate"
+        ],
+        "synonyms": "show, prove, illustrate",
+        "antonyms": "hide, conceal",
+        "topic": "Showing",
+        "cefrLevel": "B2",
+        "ieltsBand": "6.5"
+    },
+    {
+        "word": "emphasize",
+        "partOfSpeech": "verb",
+        "definition": "to give special importance or attention to something",
+        "ipaUk": "/ˈem.fə.saɪz/",
+        "ipaUs": "/ˈem.fə.saɪz/",
+        "examples": [
+            "The teacher emphasized the importance of regular practice.",
+            "I must emphasize that this is a temporary solution.",
+            "The report emphasizes the need for immediate action."
+        ],
+        "collocations": [
+            "emphasize importance",
+            "emphasize need",
+            "strongly emphasize"
+        ],
+        "synonyms": "stress, highlight, underline",
+        "antonyms": "downplay, minimize",
+        "topic": "Communication",
+        "cefrLevel": "B2",
+        "ieltsBand": "6.5"
+    },
+    {
+        "word": "facilitate",
+        "partOfSpeech": "verb",
+        "definition": "to make something possible or easier",
+        "ipaUk": "/fəˈsɪl.ɪ.teɪt/",
+        "ipaUs": "/fəˈsɪl.ə.teɪt/",
+        "examples": [
+            "Technology can facilitate communication across long distances.",
+            "The new system will facilitate faster processing of applications.",
+            "The teacher's role is to facilitate learning, not just transfer knowledge."
+        ],
+        "collocations": [
+            "facilitate communication",
+            "facilitate learning",
+            "facilitate discussion"
+        ],
+        "synonyms": "enable, ease, assist",
+        "antonyms": "hinder, obstruct, prevent",
+        "topic": "Making easier",
+        "cefrLevel": "C1",
+        "ieltsBand": "7.0"
+    },
+    {
+        "word": "significant",
+        "partOfSpeech": "adjective",
+        "definition": "important or noticeable",
+        "ipaUk": "/sɪɡˈnɪf.ɪ.kənt/",
+        "ipaUs": "/sɪɡˈnɪf.ə.kənt/",
+        "examples": [
+            "There has been a significant improvement in air quality.",
+            "The discovery represents a significant breakthrough in cancer research.",
+            "Education plays a significant role in economic development."
+        ],
+        "collocations": [
+            "significant impact",
+            "significant difference",
+            "significant role"
+        ],
+        "synonyms": "important, considerable, substantial",
+        "antonyms": "insignificant, minor, trivial",
+        "topic": "Importance",
+        "cefrLevel": "B2",
+        "ieltsBand": "6.0"
+    }
+]
