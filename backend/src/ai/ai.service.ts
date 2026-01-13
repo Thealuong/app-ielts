@@ -18,7 +18,7 @@ export class AiService {
         const apiKey = this.configService.get<string>('GEMINI_API_KEY');
         if (apiKey) {
             this.genAI = new GoogleGenerativeAI(apiKey);
-            this.model = this.genAI.getGenerativeModel({ model: 'gemini-pro' });
+            this.model = this.genAI.getGenerativeModel({ model: 'gemini-flash-latest' });
         }
     }
 
@@ -164,9 +164,10 @@ export class AiService {
         };
     }
 
-    async generatePracticeSet(word: string, definition: string, partOfSpeech: string): Promise<any> {
-        // Check cache
-        const cached = await this.getCachedContent(word, 'practice_set');
+    async generatePracticeSet(word: string, definition: string, partOfSpeech: string, topic?: string): Promise<any> {
+        // Check cache (key inclusive of topic if provided)
+        const cacheKey = topic ? `practice_set_${topic}` : 'practice_set';
+        const cached = await this.getCachedContent(word, cacheKey);
         if (cached) {
             try {
                 const data = JSON.parse(cached.content);
@@ -187,7 +188,12 @@ export class AiService {
             };
         }
 
+        const contextInstruction = topic
+            ? `Context: The word is being learned under the IELTS topic "${topic}". Ensure all sentences and examples relate to "${topic}".`
+            : '';
+
         const prompt = `Create a 5-level practice set for the IELTS word "${word}" (${partOfSpeech}, definition: "${definition}").
+    ${contextInstruction}
     
     Return ONLY a JSON object with this structure:
     {
@@ -256,6 +262,31 @@ export class AiService {
         }
     }
 
+    async explainError(question: string, userAnswer: string, correctAnswer: string, context: string = ''): Promise<string> {
+        if (!this.model) return 'Không thể tạo giải thích lúc này.';
+
+        const prompt = `A student answered a quiz question wrong.
+        Question: "${question}"
+        Student Answer: "${userAnswer}"
+        Correct Answer: "${correctAnswer}"
+        ${context ? `Context: ${context}` : ''}
+
+        Task: Explain in VIETNAMESE why the student's answer is wrong and why the correct answer is right.
+        Requirements:
+        - Very brief (1-2 sentences).
+        - Friendly and encouraging tone.
+        - Start with "Tiếc quá!" or "Chưa đúng rồi!".`;
+
+        try {
+            const result = await this.model.generateContent(prompt);
+            const response = await result.response;
+            return response.text();
+        } catch (error) {
+            console.error('AI error explain:', error);
+            return 'Rất tiếc, AI đang bận.';
+        }
+    }
+
     private async getCachedContent(word: string, contentType: string): Promise<AiGeneratedContent | null> {
         // Find cached content that hasn't expired
         const cached = await this.cacheRepository.findOne({
@@ -269,6 +300,47 @@ export class AiService {
         }
 
         return null;
+    }
+
+    async classifyWords(words: { id: number; word: string; definition: string }[]): Promise<{ id: number; topic: string }[]> {
+        if (!this.model) return [];
+
+        const topics = [
+            'Education', 'Work', 'Family', 'Housing', 'Daily Life', 'Food', 'Hobbies', 'Travel',
+            'Technology', 'Environment', 'Health', 'Transport', 'Crime', 'Government', 'Society',
+            'Art', 'Business', 'Science', 'History', 'Architecture', 'General'
+        ];
+
+        const prompt = `Classify these IELTS words into the most suitable topic from this list: ${topics.join(', ')}.
+        
+        Words:
+        ${words.map(w => `"${w.word}" (${w.definition})`).join('\n')}
+
+        Return JSON array: [{ "word": "string", "topic": "string" }]
+        If a word doesn't fit specific topics well, use "General".`;
+
+        try {
+            const result = await this.model.generateContent(prompt);
+            const response = await result.response;
+            const text = response.text();
+            console.log('AI Classify Raw Response:', text);
+            const jsonMatch = text.match(/\[[\s\S]*\]/);
+
+            if (jsonMatch) {
+                const classifications = JSON.parse(jsonMatch[0]);
+                // Map back to IDs
+                return words.map(w => {
+                    const match = classifications.find((c: any) => c.word.toLowerCase() === w.word.toLowerCase());
+                    return {
+                        id: w.id,
+                        topic: match ? match.topic : 'General'
+                    };
+                });
+            }
+        } catch (error) {
+            console.error('AI Classification error:', error);
+        }
+        return [];
     }
 
     private async cacheContent(word: string, contentType: string, content: string) {

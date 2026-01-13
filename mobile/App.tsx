@@ -12,6 +12,7 @@ import ReviewScreen from './src/screens/ReviewScreen';
 import ProgressScreen from './src/screens/ProgressScreen';
 import VocabularyListScreen from './src/screens/VocabularyListScreen';
 import NotesScreen from './src/screens/NotesScreen';
+import RoadmapScreen from './src/screens/RoadmapScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -77,6 +78,7 @@ export default function App() {
                 <Stack.Navigator screenOptions={{ headerShown: false }}>
                     <Stack.Screen name="MainTabs" component={MainTabs} />
                     <Stack.Screen name="VocabularyList" component={VocabularyListScreen} />
+                    <Stack.Screen name="Roadmap" component={RoadmapScreen} />
                 </Stack.Navigator>
             </NavigationContainer>
         </>

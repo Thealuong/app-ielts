@@ -13,7 +13,7 @@ import { vocabularyAPI, progressAPI, aiAPI, notesAPI } from '../services/api';
 import QuickNote from '../components/QuickNote';
 
 export default function LearnScreen({ route }: any) {
-    const { dayNumber } = route?.params || {};
+    const { dayNumber, topicName } = route?.params || {};
     const [words, setWords] = useState<any[]>([]);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [showDefinition, setShowDefinition] = useState(false);
@@ -34,16 +34,19 @@ export default function LearnScreen({ route }: any) {
     const [practiceFeedback, setPracticeFeedback] = useState<'neutral' | 'correct' | 'incorrect'>('neutral');
     const [loadingPractice, setLoadingPractice] = useState(false);
     const [currentExample, setCurrentExample] = useState<string>('');
+    const [aiExplanation, setAiExplanation] = useState<string | null>(null);
 
     useEffect(() => {
         loadWords();
-    }, [dayNumber]);
+    }, [dayNumber, topicName]);
 
     const loadWords = async () => {
         setLoading(true);
         try {
             let response;
-            if (dayNumber) {
+            if (topicName) {
+                response = await vocabularyAPI.getByTopic(topicName);
+            } else if (dayNumber) {
                 response = await vocabularyAPI.getDayWords(dayNumber);
             } else {
                 response = await vocabularyAPI.getDailyWords();
@@ -94,7 +97,8 @@ export default function LearnScreen({ route }: any) {
                 const response = await aiAPI.generatePractice(
                     currentWord.word,
                     currentWord.definition,
-                    currentWord.partOfSpeech
+                    currentWord.partOfSpeech,
+                    topicName // Pass the topic context
                 );
 
                 if (response.data.questions && Array.isArray(response.data.questions)) {
@@ -124,8 +128,7 @@ export default function LearnScreen({ route }: any) {
             if (currentIndex < words.length - 1) {
                 setCurrentIndex(currentIndex + 1);
                 setShowDefinition(false);
-                setAiExamples([]);
-                setAiCollocations([]); // Clear collocations
+                setLearningContent([]); // Reset AI content
                 setIsPracticeMode(false); // Reset practice mode
             } else {
                 Alert.alert('Great Job!', "You've completed today's lesson!", [
@@ -285,8 +288,9 @@ export default function LearnScreen({ route }: any) {
                                                     practiceFeedback === 'correct' && index === practiceQuestions[practiceLevel].correctIndex && styles.mcqCorrect,
                                                     practiceFeedback === 'incorrect' && index !== practiceQuestions[practiceLevel].correctIndex && styles.mcqIncorrectDisabled,
                                                 ]}
-                                                onPress={() => {
+                                                onPress={async () => {
                                                     if (index === practiceQuestions[practiceLevel].correctIndex) {
+                                                        setAiExplanation(null); // Clear previous explanation
                                                         setPracticeFeedback('correct');
                                                         setTimeout(() => {
                                                             if (practiceLevel < 4) {
@@ -294,7 +298,6 @@ export default function LearnScreen({ route }: any) {
                                                                 setPracticeFeedback('neutral');
                                                                 setPracticeInput('');
                                                             } else {
-                                                                // Done all 5 levels
                                                                 Alert.alert("🔥 Mastered!", "You passed all 5 levels!", [
                                                                     { text: "Finish", onPress: () => handleNext(5) }
                                                                 ]);
@@ -302,7 +305,18 @@ export default function LearnScreen({ route }: any) {
                                                         }, 1000);
                                                     } else {
                                                         setPracticeFeedback('incorrect');
-                                                        Alert.alert("Wrong!", "Try again!");
+                                                        setAiExplanation("🤖 Đang phân tích lỗi sai...");
+                                                        try {
+                                                            const response = await aiAPI.explainError(
+                                                                practiceQuestions[practiceLevel].question,
+                                                                option,
+                                                                practiceQuestions[practiceLevel].options[practiceQuestions[practiceLevel].correctIndex],
+                                                                currentWord.word
+                                                            );
+                                                            setAiExplanation(response.data.feedback);
+                                                        } catch (e) {
+                                                            setAiExplanation("Rất tiếc, AI đang bận.");
+                                                        }
                                                     }
                                                 }}
                                             >
@@ -335,9 +349,10 @@ export default function LearnScreen({ route }: any) {
 
                                         <TouchableOpacity
                                             style={styles.checkButton}
-                                            onPress={() => {
+                                            onPress={async () => {
                                                 const correctAnswer = practiceQuestions[practiceLevel].answer;
                                                 if (practiceInput.toLowerCase().trim() === correctAnswer.toLowerCase().trim()) {
+                                                    setAiExplanation(null);
                                                     setPracticeFeedback('correct');
                                                     setTimeout(() => {
                                                         if (practiceLevel < 4) {
@@ -352,12 +367,31 @@ export default function LearnScreen({ route }: any) {
                                                     }, 1000);
                                                 } else {
                                                     setPracticeFeedback('incorrect');
+                                                    setAiExplanation("🤖 Đang phân tích lỗi sai...");
+                                                    try {
+                                                        const response = await aiAPI.explainError(
+                                                            practiceQuestions[practiceLevel].question,
+                                                            practiceInput,
+                                                            correctAnswer,
+                                                            currentWord.word
+                                                        );
+                                                        setAiExplanation(response.data.feedback);
+                                                    } catch (e) {
+                                                        setAiExplanation("Rất tiếc, AI đang bận.");
+                                                    }
                                                 }
                                             }}
                                         >
                                             <Text style={styles.checkButtonText}>Check Answer</Text>
                                         </TouchableOpacity>
                                     </>
+                                )}
+
+                                {aiExplanation && (
+                                    <View style={styles.aiExplanationBox}>
+                                        <Text style={styles.aiExplanationTitle}>💡 Giải thích AI:</Text>
+                                        <Text style={styles.aiExplanationText}>{aiExplanation}</Text>
+                                    </View>
                                 )}
                             </>
                         ) : (
@@ -690,12 +724,7 @@ const styles = StyleSheet.create({
         color: '#374151',
         lineHeight: 22,
     },
-    aiSection: {
-        marginTop: 20,
-        padding: 16,
-        backgroundColor: '#F0F9FF',
-        borderRadius: 12,
-    },
+
     aiButton: {
         marginTop: 16,
         padding: 12,
@@ -742,5 +771,24 @@ const styles = StyleSheet.create({
     emptySubtitle: {
         fontSize: 16,
         color: '#6B7280',
+    },
+    aiExplanationBox: {
+        marginTop: 16,
+        backgroundColor: '#FFFBEB', // Light yellow for attention
+        padding: 12,
+        borderRadius: 8,
+        borderLeftWidth: 4,
+        borderLeftColor: '#F59E0B',
+    },
+    aiExplanationTitle: {
+        fontSize: 14,
+        fontWeight: 'bold',
+        color: '#B45309',
+        marginBottom: 4,
+    },
+    aiExplanationText: {
+        fontSize: 14,
+        color: '#92400E',
+        lineHeight: 20,
     },
 });

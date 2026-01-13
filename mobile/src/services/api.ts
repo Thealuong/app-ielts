@@ -54,6 +54,10 @@ export const vocabularyAPI = {
     getDayWords: (dayNumber: number) => api.get(`/vocabulary/day/${dayNumber}`),
     search: (query: string) => api.get('/vocabulary/search', { params: { q: query } }),
     getById: (id: number) => api.get(`/vocabulary/${id}`),
+
+    // Topic Roadmap
+    getTopics: () => api.get('/vocabulary/topics'),
+    getByTopic: (topicName: string) => api.get('/vocabulary/by-topic', { params: { name: topicName } }),
 };
 
 // Progress APIs
@@ -75,12 +79,14 @@ export const aiAPI = {
     generateExamples: (word: string, definition: string, partOfSpeech: string) =>
         api.post('/ai/examples', { word, definition, partOfSpeech }),
 
-    generatePractice: (word: string, definition: string, partOfSpeech: string) =>
-        api.post('/ai/practice', { word, definition, partOfSpeech }),
+    generatePractice: (word: string, definition: string, partOfSpeech: string, topic?: string) =>
+        api.post('/ai/practice', { word, definition, partOfSpeech, topic }),
     generateQuiz: (vocabularyId: number) =>
         api.post('/ai/quiz', { vocabularyId }),
     explainUsage: (word: string, context: string) =>
         api.post('/ai/explain', { word, context }),
+    explainError: (question: string, userAnswer: string, correctAnswer: string, context?: string) =>
+        api.post('/ai/explain-error', { question, userAnswer, correctAnswer, context }),
 };
 
 // Notes APIs

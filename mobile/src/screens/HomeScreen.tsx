@@ -89,6 +89,15 @@ export default function HomeScreen({ navigation }: any) {
                 </TouchableOpacity>
 
                 <TouchableOpacity
+                    style={[styles.actionButton, { backgroundColor: '#F59E0B' }]}
+                    onPress={() => navigation.navigate('Roadmap')}
+                >
+                    <Text style={styles.actionIcon}>🗺️</Text>
+                    <Text style={styles.actionTitle}>Learning Roadmap</Text>
+                    <Text style={styles.actionSubtitle}>By Topic</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
                     style={[styles.actionButton, { backgroundColor: '#10B981' }]}
                     onPress={() => navigation.navigate('Review')}
                 >

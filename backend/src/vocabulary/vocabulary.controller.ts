@@ -27,6 +27,16 @@ export class VocabularyController {
         return this.vocabularyService.searchVocabulary(query);
     }
 
+    @Get('topics')
+    async getTopics() {
+        return this.vocabularyService.getTopics();
+    }
+
+    @Get('by-topic')
+    async getVocabularyByTopic(@Query('name') name: string) {
+        return this.vocabularyService.getWordsByTopic(name, 1); // Hardcoded user
+    }
+
     @Get('progress')
     async getProgress() {
         return this.vocabularyService.getUserProgress(1); // Hardcoded for single user
@@ -40,5 +50,10 @@ export class VocabularyController {
     @Post('import')
     async import(@Body() body: { words: any[] }) {
         return this.vocabularyService.importVocabulary(body.words);
+    }
+
+    @Post('auto-categorize')
+    async autoCategorize(@Body() body: { limit?: number }) {
+        return this.vocabularyService.autoCategorizeWords(body?.limit || 50);
     }
 }

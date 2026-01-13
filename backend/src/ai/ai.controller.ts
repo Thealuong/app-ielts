@@ -25,14 +25,25 @@ export class AiController {
     }
 
     @Post('practice')
-    async generatePractice(@Body() body: { word: string; definition: string; partOfSpeech: string }) {
-        return await this.aiService.generatePracticeSet(body.word, body.definition, body.partOfSpeech);
+    async generatePractice(@Body() body: { word: string; definition: string; partOfSpeech: string; topic?: string }) {
+        return await this.aiService.generatePracticeSet(body.word, body.definition, body.partOfSpeech, body.topic);
     }
     @Post('explain')
     async explain(@Body() body: { word: string; sentence: string }) {
         const feedback = await this.aiService.generateExplanation(
             body.word,
             body.sentence,
+        );
+        return { feedback };
+    }
+
+    @Post('explain-error')
+    async explainError(@Body() body: { question: string; userAnswer: string; correctAnswer: string; context?: string }) {
+        const feedback = await this.aiService.explainError(
+            body.question,
+            body.userAnswer,
+            body.correctAnswer,
+            body.context
         );
         return { feedback };
     }
