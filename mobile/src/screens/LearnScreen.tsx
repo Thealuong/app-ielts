@@ -36,6 +36,8 @@ export default function LearnScreen({ route }: any) {
     const [currentExample, setCurrentExample] = useState<string>('');
     const [aiExplanation, setAiExplanation] = useState<string | null>(null);
 
+    const [isPracticeComplete, setIsPracticeComplete] = useState(false);
+
     useEffect(() => {
         loadWords();
     }, [dayNumber, topicName]);
@@ -89,6 +91,7 @@ export default function LearnScreen({ route }: any) {
         if (quality === 0) {
             setIsPracticeMode(true);
             setPracticeLevel(0);
+            setIsPracticeComplete(false);
             setPracticeQuestions([]);
             setLoadingPractice(true);
 
@@ -122,21 +125,46 @@ export default function LearnScreen({ route }: any) {
             return;
         }
 
-        try {
-            await progressAPI.recordProgress(currentWord.id, quality);
+        // Optimistic update - Move next immediately
+        if (!currentWord.id) {
+            console.error("Missing Word ID");
+        } else {
+            progressAPI.recordProgress(currentWord.id, quality)
+                .then(() => console.log("Progress recorded"))
+                .catch(err => console.error("Progress save failed", err));
+        }
 
-            if (currentIndex < words.length - 1) {
-                setCurrentIndex(currentIndex + 1);
-                setShowDefinition(false);
-                setLearningContent([]); // Reset AI content
-                setIsPracticeMode(false); // Reset practice mode
-            } else {
-                Alert.alert('Great Job!', "You've completed today's lesson!", [
-                    { text: 'OK', onPress: () => { setCurrentIndex(0); setIsPracticeMode(false); } },
-                ]);
-            }
-        } catch (error) {
-            console.error('Error recording progress:', error);
+        if (currentIndex < words.length - 1) {
+            setCurrentIndex(currentIndex + 1);
+            setShowDefinition(false);
+            setLearningContent([]); // Reset AI content
+            setIsPracticeMode(false); // Reset practice mode
+            setIsPracticeComplete(false);
+        } else {
+            Alert.alert('Great Job!', "You've completed today's lesson!", [
+                { text: 'OK', onPress: () => { setCurrentIndex(0); setIsPracticeMode(false); setIsPracticeComplete(false); } },
+            ]);
+        }
+    };
+
+    const handlePrevious = () => {
+        if (currentIndex > 0) {
+            setCurrentIndex(currentIndex - 1);
+            setShowDefinition(false);
+            setLearningContent([]);
+            setIsPracticeMode(false);
+            setIsPracticeComplete(false);
+        }
+    };
+
+
+    const handleNextWord = () => {
+        if (currentIndex < words.length - 1) {
+            setCurrentIndex(currentIndex + 1);
+            setShowDefinition(false);
+            setLearningContent([]);
+            setIsPracticeMode(false);
+            setIsPracticeComplete(false);
         }
     };
 
@@ -164,10 +192,22 @@ export default function LearnScreen({ route }: any) {
         <View style={styles.container}>
             {/* Header */}
             <View style={styles.header}>
-                <Text style={styles.headerTitle}>Learn New Words</Text>
-                <Text style={styles.progress}>
-                    {currentIndex + 1} / {words.length}
-                </Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <TouchableOpacity onPress={handlePrevious} style={{ padding: 8, marginRight: 4 }}>
+                        <Text style={{ fontSize: 28, color: currentIndex > 0 ? '#4F46E5' : '#E5E7EB' }}>⬅</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity onPress={handleNextWord} style={{ padding: 8 }}>
+                        <Text style={{ fontSize: 28, color: currentIndex < words.length - 1 ? '#4F46E5' : '#E5E7EB' }}>➡</Text>
+                    </TouchableOpacity>
+                </View>
+
+                <View style={{ alignItems: 'flex-end' }}>
+                    <Text style={styles.headerTitle}>Word</Text>
+                    <Text style={styles.progress}>
+                        {currentIndex + 1} / {words.length}
+                    </Text>
+                </View>
             </View>
 
             {/* Progress Bar */}
@@ -264,6 +304,33 @@ export default function LearnScreen({ route }: any) {
                     <View style={styles.practiceContainer}>
                         {loadingPractice ? (
                             <ActivityIndicator size="large" color="#4F46E5" />
+                        ) : isPracticeComplete ? (
+                            // COMPLETION UI
+                            <View style={{ alignItems: 'center', padding: 20 }}>
+                                <Text style={{ fontSize: 48 }}>🎉</Text>
+                                <Text style={{ fontSize: 22, fontWeight: 'bold', color: '#10B981', marginTop: 10 }}>Excellent!</Text>
+                                <Text style={{ fontSize: 16, color: '#6B7280', textAlign: 'center', marginTop: 5, marginBottom: 20 }}>
+                                    You have mastered this word.
+                                </Text>
+
+                                <TouchableOpacity
+                                    style={[styles.button, { backgroundColor: '#4F46E5', width: '100%' }]}
+                                    onPress={() => handleNext(5)}
+                                >
+                                    <Text style={styles.buttonText}>Next Word ➡</Text>
+                                </TouchableOpacity>
+
+                                <TouchableOpacity
+                                    style={{ marginTop: 15 }}
+                                    onPress={() => {
+                                        setPracticeLevel(0);
+                                        setIsPracticeComplete(false);
+                                        setPracticeFeedback('neutral');
+                                    }}
+                                >
+                                    <Text style={{ color: '#6B7280' }}>Reference / Practice Again</Text>
+                                </TouchableOpacity>
+                            </View>
                         ) : practiceQuestions.length > 0 ? (
                             <>
                                 <View style={styles.levelBadge}>
@@ -298,11 +365,9 @@ export default function LearnScreen({ route }: any) {
                                                                 setPracticeFeedback('neutral');
                                                                 setPracticeInput('');
                                                             } else {
-                                                                Alert.alert("🔥 Mastered!", "You passed all 5 levels!", [
-                                                                    { text: "Finish", onPress: () => handleNext(5) }
-                                                                ]);
+                                                                setIsPracticeComplete(true);
                                                             }
-                                                        }, 1000);
+                                                        }, 500);
                                                     } else {
                                                         setPracticeFeedback('incorrect');
                                                         setAiExplanation("🤖 Đang phân tích lỗi sai...");
@@ -360,11 +425,9 @@ export default function LearnScreen({ route }: any) {
                                                             setPracticeFeedback('neutral');
                                                             setPracticeInput('');
                                                         } else {
-                                                            Alert.alert("🔥 Mastered!", "You passed all 5 levels!", [
-                                                                { text: "Finish", onPress: () => handleNext(5) }
-                                                            ]);
+                                                            setIsPracticeComplete(true);
                                                         }
-                                                    }, 1000);
+                                                    }, 500);
                                                 } else {
                                                     setPracticeFeedback('incorrect');
                                                     setAiExplanation("🤖 Đang phân tích lỗi sai...");

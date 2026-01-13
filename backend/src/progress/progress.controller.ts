@@ -21,11 +21,19 @@ export class ProgressController {
     async recordProgress(
         @Body() body: { vocabularyId: number; quality: number },
     ) {
-        return this.progressService.recordProgress(
-            1, // Hardcoded for single user
-            body.vocabularyId,
-            body.quality,
-        );
+        console.log(`[Backend] Receive recordProgress request: vocabId=${body.vocabularyId}, quality=${body.quality}`);
+        try {
+            const result = await this.progressService.recordProgress(
+                1, // Hardcoded for single user
+                body.vocabularyId,
+                body.quality,
+            );
+            console.log(`[Backend] recordProgress success:`, result.id);
+            return result;
+        } catch (e) {
+            console.error(`[Backend] recordProgress ERROR:`, e);
+            throw e;
+        }
     }
 
     @Post('session')
