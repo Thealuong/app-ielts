@@ -169,11 +169,12 @@ export class VocabularyService {
             .select('v.topic', 'topic')
             .addSelect('COUNT(v.id)', 'count')
             .addSelect("COUNT(CASE WHEN p.mastery_level = 'mastered' THEN 1 END)", 'learned')
+            .addSelect('MIN(v.id)', 'min_id') // Add min_id for sorting
             .leftJoin('v.userProgress', 'p', 'p.user_id = :userId', { userId })
             .where('v.topic IS NOT NULL')
             .andWhere("v.topic != ''")
             .groupBy('v.topic')
-            .orderBy('count', 'DESC')
+            .orderBy('min_id', 'ASC') // Sort by curriculum order
             .getRawMany();
 
         return topics;

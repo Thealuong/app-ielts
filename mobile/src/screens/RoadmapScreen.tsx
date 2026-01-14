@@ -13,6 +13,7 @@ import { vocabularyAPI } from '../services/api';
 export default function RoadmapScreen({ navigation }: any) {
     const [topics, setTopics] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const WORDS_PER_DAY = 50;
 
     useEffect(() => {
         loadTopics();
@@ -21,7 +22,25 @@ export default function RoadmapScreen({ navigation }: any) {
     const loadTopics = async () => {
         try {
             const response = await vocabularyAPI.getTopics();
-            setTopics(response.data);
+            const rawTopics = response.data;
+
+            // Calculate Day Schedule
+            let cumulativeWords = 0;
+            const processedTopics = rawTopics.map((topic: any) => {
+                const count = parseInt(topic.count) || 0;
+
+                const startDay = Math.floor(cumulativeWords / WORDS_PER_DAY) + 1;
+                cumulativeWords += count;
+                const endDay = Math.floor((cumulativeWords - 1) / WORDS_PER_DAY) + 1;
+
+                return {
+                    ...topic,
+                    startDay,
+                    endDay
+                };
+            });
+
+            setTopics(processedTopics);
         } catch (error) {
             console.error('Error loading topics:', error);
             Alert.alert('Error', 'Failed to load topics');
@@ -48,6 +67,10 @@ export default function RoadmapScreen({ navigation }: any) {
         const total = parseInt(item.count) || 0;
         const percentage = total > 0 ? (learned / total) * 100 : 0;
 
+        const dayText = item.startDay === item.endDay
+            ? `Day ${item.startDay}`
+            : `Day ${item.startDay} - ${item.endDay}`;
+
         return (
             <TouchableOpacity
                 style={styles.topicCard}
@@ -59,7 +82,13 @@ export default function RoadmapScreen({ navigation }: any) {
                     </Text>
                 </View>
                 <View style={styles.content}>
-                    <Text style={styles.topicTitle}>{item.topic}</Text>
+                    <View style={styles.topicHeader}>
+                        <Text style={styles.topicTitle}>{item.topic}</Text>
+                        <View style={styles.dayBadge}>
+                            <Text style={styles.dayText}>{dayText}</Text>
+                        </View>
+                    </View>
+
                     <View style={styles.progressRow}>
                         <Text style={styles.wordCount}>{learned} / {total} words</Text>
                         <Text style={styles.percentage}>{Math.round(percentage)}%</Text>
@@ -74,7 +103,10 @@ export default function RoadmapScreen({ navigation }: any) {
 
     return (
         <View style={styles.container}>
-            <Text style={styles.headerTitle}>🗺️ Learning Roadmap</Text>
+            <View style={styles.header}>
+                <Text style={styles.headerTitle}>📅 60-Day Challenge</Text>
+                <Text style={styles.subHeader}>Target: 50 words / day</Text>
+            </View>
             <FlatList
                 data={topics}
                 renderItem={renderItem}
@@ -179,5 +211,33 @@ const styles = StyleSheet.create({
         height: '100%',
         backgroundColor: '#4F46E5',
         borderRadius: 3,
+    },
+    header: {
+        paddingHorizontal: 20,
+        marginBottom: 20,
+        alignItems: 'center',
+    },
+    subHeader: {
+        fontSize: 16,
+        color: '#4B5563',
+        marginBottom: 8,
+    },
+    topicHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'flex-start',
+        marginBottom: 4,
+    },
+    dayBadge: {
+        backgroundColor: '#E0E7FF',
+        paddingHorizontal: 8,
+        paddingVertical: 2,
+        borderRadius: 12,
+        marginLeft: 8,
+    },
+    dayText: {
+        color: '#4338CA',
+        fontSize: 12,
+        fontWeight: 'bold',
     },
 });

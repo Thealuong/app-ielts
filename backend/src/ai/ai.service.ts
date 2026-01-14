@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, MoreThan } from 'typeorm';
+import * as crypto from 'crypto';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { AiGeneratedContent } from './entities/ai-generated-content.entity';
 
@@ -263,6 +264,11 @@ export class AiService {
     }
 
     async explainError(question: string, userAnswer: string, correctAnswer: string, context: string = ''): Promise<string> {
+        // Cache Check
+        const cacheKey = this.generateCacheKey('explain_error', `${question}:${userAnswer}:${correctAnswer}`);
+        const cached = await this.getCachedContent('', 'explain_error', cacheKey);
+        if (cached) return cached.content;
+
         if (!this.model) return 'Không thể tạo giải thích lúc này.';
 
         const prompt = `A student answered a quiz question wrong.
@@ -280,7 +286,11 @@ export class AiService {
         try {
             const result = await this.model.generateContent(prompt);
             const response = await result.response;
-            return response.text();
+            const text = response.text();
+
+            // Save Cache
+            await this.cacheContent('', 'explain_error', text, cacheKey);
+            return text;
         } catch (error) {
             console.error('AI error explain:', error);
             return 'Rất tiếc, AI đang bận.';
@@ -288,6 +298,11 @@ export class AiService {
     }
 
     async translate(text: string, context: string = ''): Promise<string> {
+        // Cache Check
+        const cacheKey = this.generateCacheKey('translate', `${text}:${context}`);
+        const cached = await this.getCachedContent('', 'translate', cacheKey);
+        if (cached) return cached.content;
+
         if (!this.model) return 'AI Translate Unavailable';
 
         const prompt = `Translate the following text to VIETNAMESE.
@@ -303,19 +318,39 @@ export class AiService {
         try {
             const result = await this.model.generateContent(prompt);
             const response = await result.response;
-            return response.text();
+            const translation = response.text();
+
+            // Save Cache
+            await this.cacheContent('', 'translate', translation, cacheKey);
+
+            return translation;
         } catch (error) {
             console.error('AI error translate:', error);
             return 'Lỗi dịch thuật.';
         }
     }
 
-    private async getCachedContent(word: string, contentType: string): Promise<AiGeneratedContent | null> {
-        // Find cached content that hasn't expired
+    private generateCacheKey(type: string, input: string): string {
+        return `${type}:${crypto.createHash('md5').update(input).digest('hex')}`;
+    }
+
+    private async getCachedContent(word: string, contentType: string, cacheKey?: string): Promise<AiGeneratedContent | null> {
+        // Build query
+        const query: any = { contentType };
+
+        if (cacheKey) {
+            query.cache_key = cacheKey;
+        } else {
+            // Fallback for legacy ID-based cache
+            // We can't query by word string directly unless we join, but for now let's assume word passed is actually ID or ignored if key provided
+            // Actually, for legacy, we relied on vocabularyId matching.
+            // If no cacheKey provided, we skip or assume caller handled ID logic. 
+            // Best to just rely on cacheKey for new flow.
+            return null;
+        }
+
         const cached = await this.cacheRepository.findOne({
-            where: {
-                contentType,
-            },
+            where: query
         });
 
         if (cached && (!cached.expiresAt || cached.expiresAt > new Date())) {
@@ -325,54 +360,14 @@ export class AiService {
         return null;
     }
 
-    async classifyWords(words: { id: number; word: string; definition: string }[]): Promise<{ id: number; topic: string }[]> {
-        if (!this.model) return [];
-
-        const topics = [
-            'Education', 'Work', 'Family', 'Housing', 'Daily Life', 'Food', 'Hobbies', 'Travel',
-            'Technology', 'Environment', 'Health', 'Transport', 'Crime', 'Government', 'Society',
-            'Art', 'Business', 'Science', 'History', 'Architecture', 'General'
-        ];
-
-        const prompt = `Classify these IELTS words into the most suitable topic from this list: ${topics.join(', ')}.
-        
-        Words:
-        ${words.map(w => `"${w.word}" (${w.definition})`).join('\n')}
-
-        Return JSON array: [{ "word": "string", "topic": "string" }]
-        If a word doesn't fit specific topics well, use "General".`;
-
-        try {
-            const result = await this.model.generateContent(prompt);
-            const response = await result.response;
-            const text = response.text();
-            console.log('AI Classify Raw Response:', text);
-            const jsonMatch = text.match(/\[[\s\S]*\]/);
-
-            if (jsonMatch) {
-                const classifications = JSON.parse(jsonMatch[0]);
-                // Map back to IDs
-                return words.map(w => {
-                    const match = classifications.find((c: any) => c.word.toLowerCase() === w.word.toLowerCase());
-                    return {
-                        id: w.id,
-                        topic: match ? match.topic : 'General'
-                    };
-                });
-            }
-        } catch (error) {
-            console.error('AI Classification error:', error);
-        }
-        return [];
-    }
-
-    private async cacheContent(word: string, contentType: string, content: string) {
+    private async cacheContent(word: string, contentType: string, content: string, cacheKey?: string) {
         // Cache for 30 days
         const expiresAt = new Date();
         expiresAt.setDate(expiresAt.getDate() + 30);
 
         const cache = this.cacheRepository.create({
-            vocabularyId: 0, // We'll update this when we have the ID
+            vocabularyId: null, // Legacy ID can be null now
+            cache_key: cacheKey,
             contentType,
             content,
             expiresAt,

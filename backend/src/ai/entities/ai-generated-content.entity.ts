@@ -5,10 +5,13 @@ export class AiGeneratedContent {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column({ name: 'vocabulary_id' })
-    vocabularyId: number;
+    @Column({ name: 'vocabulary_id', nullable: true })
+    vocabularyId: number; // Allow null for generic content
 
-    @Column({ name: 'content_type' }) // 'example', 'quiz', 'explanation'
+    @Column({ type: 'varchar', length: 255, nullable: true })
+    cache_key: string; // Generic key (e.g. hash of input)
+
+    @Column({ name: 'content_type' }) // 'example', 'quiz', 'explanation', 'translate'
     contentType: string;
 
     @Column({ type: 'text' })
