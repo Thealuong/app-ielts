@@ -167,11 +167,25 @@ export default function LearnScreen({ route, navigation }: any) {
 
     const handleNextWord = () => {
         if (currentIndex < words.length - 1) {
-            setCurrentIndex(currentIndex + 1);
+            const nextIndex = currentIndex + 1;
+            const nextWord = words[nextIndex];
+            setCurrentIndex(nextIndex);
             setShowDefinition(false);
-            setLearningContent([]);
             setIsPracticeMode(false);
             setIsPracticeComplete(false);
+
+            // Pre-load content
+            if (nextWord.contentData) {
+                // If static data exists, parse if string or use directly
+                try {
+                    const data = typeof nextWord.contentData === 'string' ? JSON.parse(nextWord.contentData) : nextWord.contentData;
+                    setLearningContent(data.content || []);
+                } catch (e) {
+                    setLearningContent([]);
+                }
+            } else {
+                setLearningContent([]);
+            }
         }
     };
 
@@ -290,19 +304,43 @@ export default function LearnScreen({ route, navigation }: any) {
                                 </View>
                             )}
 
-                            {/* AI Structured Content */}
+                            {/* AI Structured Content (Static or Live) */}
                             {learningContent.length > 0 && (
                                 <View style={styles.aiSection}>
-                                    <Text style={styles.sectionTitle}>✨ Usage Patterns & Examples:</Text>
+                                    <Text style={styles.sectionTitle}>✨ Word Family & Usage:</Text>
                                     {learningContent.map((item, i) => (
                                         <View key={i} style={styles.learningCard}>
-                                            <Text style={styles.patternText}>🔹 {item.pattern}</Text>
-                                            {item.meaning && <Text style={styles.meaningText}>({item.meaning})</Text>}
+                                            <View style={{ flexDirection: 'row', alignItems: 'flex-end', marginBottom: 4 }}>
+                                                <Text style={styles.patternText}>{item.ord} {item.word}</Text>
+                                                <Text style={[styles.pos, { marginLeft: 8, fontSize: 14 }]}>{item.pos}</Text>
+                                            </View>
+
+                                            <Text style={styles.meaningText}>{item.meaning}</Text>
+
+                                            {item.nuance && (
+                                                <Text style={styles.nuanceText}>📌 {item.nuance}</Text>
+                                            )}
+
+                                            {item.collocations && item.collocations.length > 0 && (
+                                                <View style={styles.collocationBox}>
+                                                    <Text style={styles.collocationTitle}>🔹 Collocations:</Text>
+                                                    {item.collocations.map((col: string, idx: number) => (
+                                                        <Text key={idx} style={styles.collocationItem}>• {col}</Text>
+                                                    ))}
+                                                </View>
+                                            )}
+
                                             <TranslatableText
                                                 text={`📌 ${item.example}`}
                                                 style={styles.exampleText}
                                                 type="example"
                                             />
+
+                                            {item.mistake && (
+                                                <View style={styles.mistakeBox}>
+                                                    <Text style={styles.mistakeText}>❌ {item.mistake}</Text>
+                                                </View>
+                                            )}
                                         </View>
                                     ))}
                                 </View>
@@ -868,11 +906,36 @@ const styles = StyleSheet.create({
     },
     aiExplanationBox: {
         marginTop: 16,
-        backgroundColor: '#FFFBEB', // Light yellow for attention
+        backgroundColor: '#FFFBEB',
         padding: 12,
         borderRadius: 8,
-        borderLeftWidth: 4,
+        borderLeftWidth: 3,
         borderLeftColor: '#F59E0B',
+    },
+    nuanceText: {
+        fontSize: 14,
+        fontStyle: 'italic',
+        color: '#4B5563',
+        marginBottom: 8,
+    },
+    collocationItem: {
+        fontSize: 15,
+        color: '#4F46E5',
+        marginBottom: 4,
+        fontWeight: '500',
+    },
+    mistakeBox: {
+        marginTop: 8,
+        padding: 8,
+        backgroundColor: '#FEF2F2',
+        borderRadius: 6,
+        borderWidth: 1,
+        borderColor: '#FECACA',
+    },
+    mistakeText: {
+        fontSize: 14,
+        color: '#DC2626',
+        fontStyle: 'italic',
     },
     aiExplanationTitle: {
         fontSize: 14,

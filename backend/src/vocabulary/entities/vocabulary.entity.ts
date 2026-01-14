@@ -33,6 +33,9 @@ export class Vocabulary {
     @Column({ type: 'text', nullable: true })
     antonyms: string;
 
+    @Column({ type: 'json', nullable: true, name: 'content_data' })
+    contentData: any; // Stores the new high-density structure (meaning, nuance, collocations, examples, mistakes)
+
     @Column({ nullable: true })
     topic: string;
 
