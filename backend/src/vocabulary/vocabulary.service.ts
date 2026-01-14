@@ -180,13 +180,21 @@ export class VocabularyService {
         return topics;
     }
 
-    async getWordsByTopic(topic: string, userId: number) {
-        const words = await this.vocabularyRepository
+    async getWordsByTopic(topic: string, userId: number, offset?: number, limit?: number) {
+        const query = this.vocabularyRepository
             .createQueryBuilder('v')
             .leftJoinAndMapOne('v.userProgress', UserVocabularyProgress, 'p', 'p.vocabularyId = v.id AND p.userId = :userId', { userId })
             .where('v.topic = :topic', { topic })
-            .getMany();
+            .orderBy('v.id', 'ASC');
 
+        if (offset !== undefined) {
+            query.skip(offset);
+        }
+        if (limit !== undefined) {
+            query.take(limit);
+        }
+
+        const words = await query.getMany();
         return words;
     }
 

@@ -57,7 +57,12 @@ export const vocabularyAPI = {
 
     // Topic Roadmap
     getTopics: () => api.get('/vocabulary/topics'),
-    getByTopic: (topicName: string) => api.get('/vocabulary/by-topic', { params: { name: topicName } }),
+    getByTopic: (topicName: string, offset?: number, limit?: number) => {
+        const params: any = { name: topicName };
+        if (offset !== undefined) params.offset = offset;
+        if (limit !== undefined) params.limit = limit;
+        return api.get('/vocabulary/by-topic', { params });
+    },
 };
 
 // Progress APIs

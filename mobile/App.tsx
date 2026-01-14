@@ -13,6 +13,7 @@ import ProgressScreen from './src/screens/ProgressScreen';
 import VocabularyListScreen from './src/screens/VocabularyListScreen';
 import NotesScreen from './src/screens/NotesScreen';
 import RoadmapScreen from './src/screens/RoadmapScreen';
+import TopicDetailScreen from './src/screens/TopicDetailScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -79,6 +80,7 @@ export default function App() {
                     <Stack.Screen name="MainTabs" component={MainTabs} />
                     <Stack.Screen name="VocabularyList" component={VocabularyListScreen} />
                     <Stack.Screen name="Roadmap" component={RoadmapScreen} />
+                    <Stack.Screen name="TopicDetail" component={TopicDetailScreen} />
                 </Stack.Navigator>
             </NavigationContainer>
         </>

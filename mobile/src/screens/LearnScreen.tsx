@@ -14,7 +14,7 @@ import QuickNote from '../components/QuickNote';
 import TranslatableText from '../components/TranslatableText';
 
 export default function LearnScreen({ route, navigation }: any) {
-    const { dayNumber, topicName } = route?.params || {};
+    const { dayNumber, topicName, offset, limit, dayLabel } = route?.params || {};
     const [words, setWords] = useState<any[]>([]);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [showDefinition, setShowDefinition] = useState(false);
@@ -41,14 +41,20 @@ export default function LearnScreen({ route, navigation }: any) {
 
     useEffect(() => {
         loadWords();
-    }, [dayNumber, topicName]);
+    }, [dayNumber, topicName, offset, limit]);
+
+    useEffect(() => {
+        if (dayLabel) {
+            navigation.setOptions({ title: dayLabel });
+        }
+    }, [dayLabel]);
 
     const loadWords = async () => {
         setLoading(true);
         try {
             let response;
             if (topicName) {
-                response = await vocabularyAPI.getByTopic(topicName);
+                response = await vocabularyAPI.getByTopic(topicName, offset, limit);
             } else if (dayNumber) {
                 response = await vocabularyAPI.getDayWords(dayNumber);
             } else {

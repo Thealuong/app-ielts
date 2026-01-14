@@ -33,8 +33,14 @@ export class VocabularyController {
     }
 
     @Get('by-topic')
-    async getVocabularyByTopic(@Query('name') name: string) {
-        return this.vocabularyService.getWordsByTopic(name, 1); // Hardcoded user
+    async getVocabularyByTopic(
+        @Query('name') name: string,
+        @Query('offset') offset?: string,
+        @Query('limit') limit?: string,
+    ) {
+        const offsetNum = offset ? parseInt(offset) : undefined;
+        const limitNum = limit ? parseInt(limit) : undefined;
+        return this.vocabularyService.getWordsByTopic(name, 1, offsetNum, limitNum); // Hardcoded user
     }
 
     @Get('progress')

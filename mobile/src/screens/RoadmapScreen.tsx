@@ -49,9 +49,11 @@ export default function RoadmapScreen({ navigation }: any) {
         }
     };
 
-    const handleTopicPress = (topic: string) => {
-        // Navigate to LearnScreen with topic filter
-        navigation.navigate('Learn', { topicName: topic });
+    const handleTopicPress = (item: any) => {
+        navigation.navigate('TopicDetail', {
+            topicName: item.topic,
+            totalWords: parseInt(item.count) || 0
+        });
     };
 
     if (loading) {
@@ -74,7 +76,7 @@ export default function RoadmapScreen({ navigation }: any) {
         return (
             <TouchableOpacity
                 style={styles.topicCard}
-                onPress={() => handleTopicPress(item.topic)}
+                onPress={() => handleTopicPress(item)}
             >
                 <View style={[styles.circle, percentage === 100 && { backgroundColor: '#D1FAE5' }]}>
                     <Text style={[styles.stepNumber, percentage === 100 && { color: '#059669' }]}>
